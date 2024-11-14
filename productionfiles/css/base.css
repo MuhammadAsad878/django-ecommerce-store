@@ -6,6 +6,9 @@
   text-decoration: none;
   color: white;
 }
+#container{
+  min-height: 50vh !important;
+}
 
 #nav{
   background-color: rgb(80, 73, 25);

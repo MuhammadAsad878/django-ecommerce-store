@@ -1,67 +1,102 @@
-from django.shortcuts import render,redirect
-from django.http import request, HttpResponse
-from django.template import loader
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate,login,logout   
+from django.shortcuts import render,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from store.models import Product
+from django.http import JsonResponse,HttpResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+
 
 
 
 # Create your views here.
-@csrf_exempt
-def SignUp(request):
-    if request.method != "POST":
-        return HttpResponse("Something went wrong!")
 
-    uname = request.POST.get('username')
-    email = request.POST.get('email')
-    pass1 = request.POST.get('password1')
-    pass2 = request.POST.get('password2')
-
-    if pass1 != pass2:
-        return HttpResponse("Both Password and Confirm Password must be equal!")
-
-    try:
-        new_user = User.objects.create_user(username=uname, email=email, password=pass1)
-        new_user.save()
-        print("User saved successfully!")
-        return redirect('loginPage')
-    
-    except Exception as e:
-        print(f"Error occurred: {e}")
-        context = {'data': "An error occurred while creating the user."}
-        return render(request, 'Error.html', context)
-
-def LoginPage(request):
-    template = loader.get_template('login.html')
-    return HttpResponse(template.render())
-
-@csrf_exempt
-def Login(request):
-    if request.method == "POST":
-        uname = request.POST.get('username')
-        passw = request.POST.get('password')
-        user = authenticate(request,username=uname,password=passw)
-        if user is not None:
-            login(request,user)
-            return redirect('home')
-        return render(request,'Error.html',context={'data':"Incorrect Usernmae and Password "})
-    
-def Index(request):
-    template = loader.get_template('signup.html')
-    return HttpResponse(template.render())
-
-def LogoutPage(request):
-    return HttpResponse("<h2> LogOut Route Working Properly </h2>")
 
 @login_required(login_url='login')
 def HomePage(request):
-    produts = Product.objects.get()
-    context = {
-        'products':produts
-    }
-    return render(request,'home.html',context)
-   
+    products = Product.objects.all()
+    cart = request.session.get('cart', {})
+    cart_count = sum(cart.values())  # Calculate total items in cart
     
+    context = {
+        'products': products,
+        'cart_count': cart_count  # Pass the count to the template
+    }
+    return render(request, 'home.html', context)
+
+   
+
+
+@csrf_exempt  # Use this only if necessary and if CSRF token is correctly handled in frontend
+def add_to_cart(request):
+    try:
+        # Get product ID and quantity, with default quantity as 1
+        product_id = str(request.POST.get('product_id'))  # Convert to string for consistency in session
+        quantity = int(request.POST.get('quantity', 1))
+
+        # Initialize cart in session if it doesn't exist
+        cart = request.session.get('cart', {})
+
+        # Add or update the product in the cart
+        if product_id in cart:
+            cart[product_id] += quantity  # Update quantity if already in cart
+        else:
+            cart[product_id] = quantity  # Add new product
+
+        # Save cart back to the session
+        request.session['cart'] = cart
+        request.session.modified = True  # Ensure session is saved
+
+        # Return the updated cart count
+        cart_count = sum(cart.values())  # Sum up the quantities of all items
+        print(cart.values())  # Debugging line to show cart contents
+        print(cart_count, "is cart count after add to cart")  # Debugging line to show cart count
+
+        return JsonResponse({'message': 'Product added to cart', 'cart_count': cart_count})
+    
+    except (ValueError, TypeError) as e:
+        # Handle cases where `quantity` might not be convertible to int or `product_id` is invalid
+        return JsonResponse({'message': 'Invalid product ID or quantity'}, status=400)
+
+def get_cart_count(request):
+    cart = request.session.get('cart', {})
+    cart_count = sum(cart.values())  # Sum up the quantities of all items
+    print("cart count is ",cart_count)
+    return JsonResponse({'cart_count': cart_count})
+
+@login_required
+def view_cart(request):
+    cart = request.session.get('cart', {})
+    print(cart.items())
+    # return HttpResponse("cart")
+    cart_items = []
+    total_price = 0
+
+    for product_id, quantity in cart.items():
+        try:
+            product = Product.objects.get(id=product_id)
+            cart_items.append({
+                'product': product,
+                'quantity': quantity,
+            })
+            total_price += product.retail_price * quantity
+        except Product.DoesNotExist:
+            continue  # Skip items if product doesn't exist
+
+    return render(request, 'cart.html', {'cart_items': cart_items, 'total_price': total_price})
+
+
+@require_POST
+def remove_from_cart(request):
+    product_id = request.POST.get('product_id')
+    cart = request.session.get('cart', {})
+
+    if product_id in cart:
+        del cart[product_id]  # Remove item from cart
+        request.session['cart'] = cart
+        request.session.modified = True
+
+    return JsonResponse({'message': 'Product removed from cart', 'cart': cart})
+
+def view_product(request,product_id):
+    product = get_object_or_404(Product, id=product_id)
+    return render(request, 'view_product.html', {'product': product})

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title%} View Item Page {% endblock title%}
+
+
+{% block content %}
+<div class="container-fluid m-5 ">
+
+  <div class="row offset-2">
+
+    <div class="card mb-3 border-0" style="max-width: 540px;">
+      <div class="row g-0">
+        <div class="col-md-4">
+          {% if product.image.url is not None %}
+          <img src="{{product.image.url}}" class="img-fluid rounded-start" alt="{{product.title}}">
+          {% else %}
+          <img src="" class="img-fluid rounded-start" alt="">      
+          {% endif %}
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title">{{product.title }}</h5>
+            <p class="card-text"> Color : {{product.color }}</p>
+            <p class="card-text">Size : {{product.size }}</p>
+            <p class="card-text">Price : {{product.retail_price }} Rs</p>
+            <button  class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">Add to Cart</button>
+          <p class="card-text">{{product.description }}</p>
+
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+  
+
+
+
+
+
+</div>
+
+<script>
+  // Add to Cart functionality
+  const addToCartBtn =  document.querySelector('.add-to-cart');
+  addToCartBtn.addEventListener('click',(e)=>{
+    let productId = e.target.dataset.productId;
+    console.log("id ",productId);
+    addToCart(productId);
+  })
+  function addToCart(productId) {
+      fetch('/store/add-to-cart/', {
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              'product_id': productId,
+              'quantity': 1
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          updateCartCount(data.cart_count); // Update the cart count
+          console.log(data.message);
+      })
+      .catch(error => console.error('Error:', error));
+  }
+
+  function updateCartCount(count) {
+      document.getElementById('cart-count').textContent = count;
+  }
+
+  // Initially update the cart count on page load
+  window.onload = function() {
+      fetch('/store/get-cart-count/')
+          .then(response => response.json())
+          .then(data => updateCartCount(data.cart_count))
+          .catch(error => console.error('Error fetching cart count:', error));
+  };
+</script>
+{% endblock content %}
