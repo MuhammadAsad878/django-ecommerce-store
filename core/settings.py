@@ -18,8 +18,8 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 # CSRF_TRUSTED_ORIGINS = ['*']  # Add additional domains as needed
 
-MEDIA_URL = '/media/'  # URL to access media files in the browser
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Directory to store media files
+MEDIA_URL = '/media/'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -28,7 +28,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Directory to store media files
 SECRET_KEY = 'django-insecure-_p)jzspqnsu#kq^e$q9g-d_z8sy)s2yf3t_g2j3s@!erc-^3q'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'store',
     'import_export',
     'bootstrap5',
+    'cart',
 ]
 
 MIDDLEWARE = [
@@ -80,6 +81,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cart.context_processors.cart',
             ],
         },
     },
@@ -128,12 +130,15 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
+SESSION_SAVE_EVERY_REQUEST = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-STATIC_ROOT = BASE_DIR / 'productionfiles'
-STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'productionfiles')
+STATIC_URL = '/productionfiles/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'store', 'static'),  # If you have app-specific static files
+]
 CSRF_COOKIE_SECURE = False
 
 # Default primary key field type

@@ -13,5 +13,5 @@ class ProductResource(resources.ModelResource):
 @admin.register(Product)
 class ProductAdmin(ExportActionModelAdmin):
     resource_class = ProductResource
-    list_display = ('title', 'size', 'color', 'retail_price','wholesale_price','stock','image')
+    list_display = ('title', 'size', 'color', 'retail_price','wholesale_price','stock')
 

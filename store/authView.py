@@ -3,7 +3,7 @@ from django.http import request, HttpResponse
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate,login  
+from django.contrib.auth import authenticate,login,logout
 
 
 @csrf_exempt
@@ -50,4 +50,5 @@ def Index(request):
     return HttpResponse(template.render())
 
 def LogoutPage(request):
-    return HttpResponse("<h2> LogOut Route Working Properly </h2>")
+     logout(request)
+     return redirect('loginPage')

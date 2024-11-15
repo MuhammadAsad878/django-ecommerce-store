@@ -1,32 +1,38 @@
-from django.shortcuts import render,get_object_or_404
+from django.shortcuts import render,get_object_or_404,redirect
 from django.contrib.auth.decorators import login_required
 from store.models import Product
 from django.http import JsonResponse,HttpResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-
+from cart.cart import Cart
 
 
 
 # Create your views here.
 
 
-@login_required(login_url='login')
+@login_required(login_url='Index')
 def HomePage(request):
     products = Product.objects.all()
+    cart = Cart(request)
     cart = request.session.get('cart', {})
-    cart_count = sum(cart.values())  # Calculate total items in cart
-    
+    cart_items = cart  # Get cart dictionary from session
+    cart_count = sum(item['quantity'] for item in cart_items.values())  # Calculate total items in cart
     context = {
         'products': products,
         'cart_count': cart_count  # Pass the count to the template
     }
+    
     return render(request, 'home.html', context)
+
+def custom_login_redirect(request):
+    return render(request, 'Error.html',{'data':"Login First!"})  # Custom page with message
 
    
 
 
-@csrf_exempt  # Use this only if necessary and if CSRF token is correctly handled in frontend
+@csrf_exempt
+@login_required(login_url='Index')  # Use this only if necessary and if CSRF token is correctly handled in frontend
 def add_to_cart(request):
     try:
         # Get product ID and quantity, with default quantity as 1
@@ -52,18 +58,18 @@ def add_to_cart(request):
         print(cart_count, "is cart count after add to cart")  # Debugging line to show cart count
 
         return JsonResponse({'message': 'Product added to cart', 'cart_count': cart_count})
-    
     except (ValueError, TypeError) as e:
         # Handle cases where `quantity` might not be convertible to int or `product_id` is invalid
         return JsonResponse({'message': 'Invalid product ID or quantity'}, status=400)
-
+    
+@login_required(login_url='Index')
 def get_cart_count(request):
     cart = request.session.get('cart', {})
     cart_count = sum(cart.values())  # Sum up the quantities of all items
     print("cart count is ",cart_count)
     return JsonResponse({'cart_count': cart_count})
 
-@login_required
+@login_required(login_url='Index')
 def view_cart(request):
     cart = request.session.get('cart', {})
     print(cart.items())
@@ -86,6 +92,7 @@ def view_cart(request):
 
 
 @require_POST
+@login_required(login_url='Index')
 def remove_from_cart(request):
     product_id = request.POST.get('product_id')
     cart = request.session.get('cart', {})
@@ -97,6 +104,17 @@ def remove_from_cart(request):
 
     return JsonResponse({'message': 'Product removed from cart', 'cart': cart})
 
+@login_required(login_url='Index')
 def view_product(request,product_id):
     product = get_object_or_404(Product, id=product_id)
     return render(request, 'view_product.html', {'product': product})
+
+@login_required(login_url='Index')
+def AboutUs(request):
+    return render(request,'aboutUs.html')
+@login_required(login_url='Index')
+def Blog(request):
+    return render(request,'blog.html')
+@login_required(login_url='Index')
+def Contact(request):
+    return render(request,'contactUs.html')

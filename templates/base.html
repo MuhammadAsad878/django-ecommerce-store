@@ -18,19 +18,19 @@
     />
 
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/base.css'%} " />
+    <link rel="stylesheet" href="{% static 'css/base.css'%}" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
   </head>
   {% comment %} --- Body Starts Here --- {% endcomment %}
 
-  <body>
+  <body id="fonts">
     <nav
       class="navbar navbar-expand-md bg-body-tertiary px-4  sticky-lg-top"
-      style="background-color: rgb(186, 170, 68) !important"
+      
     >
-      <div class="container-fluid">
+      <div class="container-fluid ">
         <a class="navbar-brand" href="{% url 'store/home/' %}">
-          {% load static %}
-          <img    src="{% static 'images/sam_logo.png'%}"   alt="Sam Shoes Store"   width="100"     height="100" />
+          <img    src="{% static 'images\sam_logo.png'%}"   alt="Sam Shoes Store"   width="70"     height="70" />
         </a>
         <button
           class="navbar-toggler"
@@ -43,69 +43,74 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-auto fs-5">
+        <div class="collapse navbar-collapse p-2 rounded-pill text-light" id="navbarSupportedContent" style="background-color: rgb(77, 70, 27);" >
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-auto fs-5 text-primary">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{% url 'store/home/' %}"
-                >Home</a
-              >
+              <a class="nav-link active text-light" aria-current="page" href="{% url 'store/home/' %}"
+                >Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#"
+              <a class="nav-link active text-light" aria-current="page" href="{% url 'store/about_us' %}"
                 >About us</a
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Blog</a>
+              <a class="nav-link active text-light" aria-current="page" href="{% url 'store/blog' %}">Blog</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#"
+              <a class="nav-link active text-light"  aria-current="page" href="{% url 'store/contact_us' %}"
                 >Contact</a
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link position-relative ms-5 " href="#">
-                <img
+              <a class="nav-link position-relative text-light ms-5 bg-body-secondary rounded-circle " href="{% url 'cart_summary' %}">
+                <img 
                   src="{% static 'images\cart-shopping-solid.svg' %}"
                   alt="Cart"
-                  width="50"
-                  height="50"
+                  width="30"
+                  height="30"
                 />
                 <span
                   id="cart-count"
                   class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                 >
-                  0
+                  {% block cartCount %}  {% endblock cartCount %}  
                 </span>
               </a>
             </li>
+            <li class="nav-item ms-5 d-flex align-items-center">
+              <a class="btn btn-dark text-secondary"  aria-current="page" href="{% url 'logout' %}"
+                >Logout</a
+              >
+            </li>
+
           </ul>
         </div>
       </div>
     </nav>
-    <div class="container">{% block content%} 
+    <div class= "container-fluid d-flex flex-column min-vh-100">
+      {% block content%} 
       
       
       {% endblock content%}
-    
     </div>
 
     {% comment %} --- Footer Starts Here --- {% endcomment %}
-    <footer class="bg-dark text-light py-5 mt-5 bottom-0" style="margin-bottom:-10rem;">
+    <footer class="bg-dark text-light py-5 mt-5 w-100 " >
       <div class="container text-center">
         <h5 class="mb-3">Sam Shoes Store</h5>
         <ul class="list-inline mb-3">
           <li class="list-inline-item">
-            <a href="#" class="text-decoration-none text-light">Home</a>
+            <a href="{% url 'store/home/' %}" class="text-decoration-none text-light">Home</a>
           </li>
           <li class="list-inline-item">
-            <a href="#" class="text-decoration-none text-light">About Us</a>
+            <a href="{% url 'store/about_us' %}" class="text-decoration-none text-light">About Us</a>
           </li>
           <li class="list-inline-item">
-            <a href="#" class="text-decoration-none text-light">Blog</a>
+            <a href="{% url 'store/blog' %}" class="text-decoration-none text-light">Blog</a>
           </li>
           <li class="list-inline-item">
-            <a href="#" class="text-decoration-none text-light">Contact</a>
+            <a href="{% url 'store/contact_us' %}" class="text-decoration-none text-light">Contact</a>
           </li>
         </ul>
         <p class="mb-0">&copy; 2024 SamShoes. All Rights Reserved.</p>
